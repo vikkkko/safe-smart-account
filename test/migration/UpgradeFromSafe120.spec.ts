@@ -30,7 +30,7 @@ describe("Upgrade from Safe 1.2.0", () => {
         await safe.setup([user1.address], 1, AddressZero, "0x", mockAddress, AddressZero, 0, AddressZero);
 
         expect(await safe.VERSION()).to.be.eq("1.2.0");
-        const nonce = await safe.nonce();
+        const nonce = await safe.channelNonces(0);
         const data = ChangeMasterCopyInterface.encodeFunctionData("changeMasterCopy", [singleton150]);
         const tx = buildSafeTransaction({ to: await safe.getAddress(), data, nonce });
         await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]);

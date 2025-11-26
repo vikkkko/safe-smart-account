@@ -25,7 +25,7 @@ describe("GuardManager", () => {
         const [, user2] = signers;
 
         const guardContract = await hre.ethers.getContractAt("ITransactionGuard", AddressZero);
-        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"]);
+        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0x5533be9d"]);
         await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true);
         const safe = await getSafe({ owners: [user2.address] });
         await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user2]);
@@ -101,7 +101,7 @@ describe("GuardManager", () => {
                 "0x" + validGuardMockAddress.toLowerCase().slice(2).padStart(64, "0"),
             );
 
-            const safeTx = await buildContractCall(safe, "setGuard", [AddressZero], await safe.nonce());
+            const safeTx = await buildContractCall(safe, "setGuard", [AddressZero], await safe.channelNonces(0));
             const signature = await safeApproveHash(user2, safe, safeTx);
             const signatureBytes = buildSignatureBytes([signature]);
 
@@ -117,6 +117,7 @@ describe("GuardManager", () => {
             expect(await validGuardMock.invocationCount()).to.be.eq(invocationCountBefore + 2n);
             const guardInterface = (await hre.ethers.getContractAt("ITransactionGuard", validGuardMockAddress)).interface;
             const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
+                safeTx.channel,
                 safeTx.to,
                 safeTx.value,
                 safeTx.data,
@@ -150,11 +151,12 @@ describe("GuardManager", () => {
             const safeAddress = await safe.getAddress();
             const safeMsgSender = getSenderAddressFromContractRunner(safe);
 
-            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.nonce() });
+            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.channelNonces(0) });
             const signature = await safeApproveHash(user2, safe, safeTx);
             const signatureBytes = buildSignatureBytes([signature]);
             const guardInterface = (await hre.ethers.getContractAt("ITransactionGuard", validGuardMockAddress)).interface;
             const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
+                safeTx.channel,
                 safeTx.to,
                 safeTx.value,
                 safeTx.data,
@@ -195,11 +197,12 @@ describe("GuardManager", () => {
             const safeAddress = await safe.getAddress();
             const safeMsgSender = getSenderAddressFromContractRunner(safe);
 
-            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.nonce() });
+            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.channelNonces(0) });
             const signature = await safeApproveHash(user2, safe, safeTx);
             const signatureBytes = buildSignatureBytes([signature]);
             const guardInterface = (await hre.ethers.getContractAt("ITransactionGuard", validGuardMockAddress)).interface;
             const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
+                safeTx.channel,
                 safeTx.to,
                 safeTx.value,
                 safeTx.data,

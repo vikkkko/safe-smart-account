@@ -59,7 +59,7 @@ describe("CreateCall", () => {
                 signers: [user1],
             } = await setupTests();
 
-            const tx = await buildContractCall(createCall, "performCreate", [1, testContract.data], await safe.nonce(), true);
+            const tx = await buildContractCall(createCall, "performCreate", [1, testContract.data], await safe.channelNonces(0), true);
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("Could not deploy contract");
         });
 
@@ -77,7 +77,7 @@ describe("CreateCall", () => {
 
             // We require this as 'emit' check the address of the event
             const safeCreateCall = createCall.attach(safeAddress);
-            const tx = await buildContractCall(createCall, "performCreate", [0, testContract.data], await safe.nonce(), true);
+            const tx = await buildContractCall(createCall, "performCreate", [0, testContract.data], await safe.channelNonces(0), true);
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]))
                 .to.emit(safe, "ExecutionSuccess")
                 .and.to.emit(safeCreateCall, "ContractCreation")
@@ -107,7 +107,7 @@ describe("CreateCall", () => {
                 createCall,
                 "performCreate",
                 [ethers.parseEther("1"), testContract.data],
-                await safe.nonce(),
+                await safe.channelNonces(0),
                 true,
             );
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]))
@@ -155,7 +155,13 @@ describe("CreateCall", () => {
                 signers: [user1],
             } = await setupTests();
 
-            const tx = await buildContractCall(createCall, "performCreate2", [1, testContract.data, salt], await safe.nonce(), true);
+            const tx = await buildContractCall(
+                createCall,
+                "performCreate2",
+                [1, testContract.data, salt],
+                await safe.channelNonces(0),
+                true,
+            );
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("Could not deploy contract");
         });
 
@@ -172,7 +178,13 @@ describe("CreateCall", () => {
 
             // We require this as 'emit' check the address of the event
             const safeCreateCall = createCall.attach(safeAddress);
-            const tx = await buildContractCall(createCall, "performCreate2", [0, testContract.data, salt], await safe.nonce(), true);
+            const tx = await buildContractCall(
+                createCall,
+                "performCreate2",
+                [0, testContract.data, salt],
+                await safe.channelNonces(0),
+                true,
+            );
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]))
                 .to.emit(safe, "ExecutionSuccess")
                 .and.to.emit(safeCreateCall, "ContractCreation")
@@ -201,7 +213,7 @@ describe("CreateCall", () => {
                 createCall,
                 "performCreate2",
                 [ethers.parseEther("1"), testContract.data, salt],
-                await safe.nonce(),
+                await safe.channelNonces(0),
                 true,
             );
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]))

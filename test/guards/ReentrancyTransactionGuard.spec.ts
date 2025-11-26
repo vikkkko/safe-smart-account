@@ -68,7 +68,7 @@ describe("ReentrancyTransactionGuard", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const safeAddress = await safe.getAddress();
-            const nonce = await safe.nonce();
+            const nonce = await safe.channelNonces(0);
             const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce: nonce + 1n });
             const signatures = [await safeSignTypedData(user1, safeAddress, safeTx)];
             const signatureBytes = buildSignatureBytes(signatures);
@@ -79,6 +79,7 @@ describe("ReentrancyTransactionGuard", () => {
                     safe,
                     "execTransaction",
                     [
+                        safeTx.channel,
                         safeTx.to,
                         safeTx.value,
                         safeTx.data,
@@ -107,7 +108,7 @@ describe("ReentrancyTransactionGuard", () => {
             const mockAddress = await mock.getAddress();
             const safeAddress = await safe.getAddress();
             const guardAddress = await guard.getAddress();
-            const nonce = await safe.nonce();
+            const nonce = await safe.channelNonces(0);
             const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce: nonce + 1n });
             const signatures = [await safeSignTypedData(user1, safeAddress, safeTx)];
 

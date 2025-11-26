@@ -41,6 +41,7 @@ contract ReentrancyTransactionGuard is BaseGuard {
      * @dev Reverts if reentrancy is detected.
      */
     function checkTransaction(
+        uint256,
         address,
         uint256,
         bytes memory,

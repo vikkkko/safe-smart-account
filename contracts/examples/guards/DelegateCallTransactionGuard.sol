@@ -28,6 +28,7 @@ contract DelegateCallTransactionGuard is BaseGuard {
      * @param operation Operation type of Safe transaction.
      */
     function checkTransaction(
+        uint256,
         address to,
         uint256,
         bytes memory,

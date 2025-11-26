@@ -38,7 +38,7 @@ describe("SafeL2", () => {
             const safeAddress = await safe.getAddress();
             const tx = buildSafeTransaction({
                 to: safeAddress,
-                nonce: await safe.nonce(),
+                nonce: await safe.channelNonces(0),
                 operation: 0,
                 gasPrice: 1,
                 safeTxGas: 1000000,

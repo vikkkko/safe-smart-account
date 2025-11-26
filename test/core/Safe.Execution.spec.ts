@@ -55,10 +55,11 @@ describe("Safe", () => {
             const { safe, signers } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
-            const tx = buildSafeTransaction({ to: safeAddress, safeTxGas: 1000000, nonce: await safe.nonce() });
+            const tx = buildSafeTransaction({ to: safeAddress, safeTxGas: 1000000, nonce: await safe.channelNonces(0) });
             const signatureBytes = buildSignatureBytes([await safeApproveHash(user1, safe, tx, true)]);
 
             const txPromise = safe.execTransaction(
+                tx.channel,
                 tx.to,
                 tx.value,
                 tx.data,
@@ -82,7 +83,7 @@ describe("Safe", () => {
             const storageSetterAddress = await storageSetter.getAddress();
             const txHash = calculateSafeTransactionHash(
                 safeAddress,
-                await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], await safe.nonce()),
+                await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], await safe.channelNonces(0)),
                 await chainId(),
             );
             await expect(executeContractCallWithSigners(safe, storageSetter, "setStorage", ["0xbaddad"], [user1]))
@@ -156,7 +157,7 @@ describe("Safe", () => {
             const safeAddress = await safe.getAddress();
             const txHash = calculateSafeTransactionHash(
                 safeAddress,
-                await buildContractCall(reverter, "revert", [], await safe.nonce(), true, { safeTxGas: 1 }),
+                await buildContractCall(reverter, "revert", [], await safe.channelNonces(0), true, { safeTxGas: 1 }),
                 await chainId(),
             );
             await expect(executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true, { safeTxGas: 1 }))
@@ -185,7 +186,7 @@ describe("Safe", () => {
             const { safe, signers } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
-            const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce(), operation: 2 });
+            const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.channelNonces(0), operation: 2 });
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.be.reverted;
         });
 
@@ -195,7 +196,7 @@ describe("Safe", () => {
             const safeAddress = await safe.getAddress();
             const tx = buildSafeTransaction({
                 to: user1.address,
-                nonce: await safe.nonce(),
+                nonce: await safe.channelNonces(0),
                 operation: 0,
                 gasPrice: 1,
                 safeTxGas: 100000,
@@ -232,7 +233,7 @@ describe("Safe", () => {
             const tx = buildSafeTransaction({
                 to: storageSetterAddress,
                 data,
-                nonce: await safe.nonce(),
+                nonce: await safe.channelNonces(0),
                 operation: 0,
                 gasPrice: 1,
                 safeTxGas: 3000,
@@ -289,7 +290,7 @@ describe("Safe", () => {
             const to = await gasUser.getAddress();
             const data = gasUser.interface.encodeFunctionData("useGas", [80]);
             const safeTxGas = 10000;
-            const tx = buildSafeTransaction({ to, data, safeTxGas, nonce: await safe.nonce() });
+            const tx = buildSafeTransaction({ to, data, safeTxGas, nonce: await safe.channelNonces(0) });
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 170000 }),
                 "Safe transaction should fail with low gasLimit",
@@ -317,7 +318,7 @@ describe("Safe", () => {
 
             const tx = buildSafeTransaction({
                 to: user1.address,
-                nonce: await safe.nonce(),
+                nonce: await safe.channelNonces(0),
                 operation: 0,
                 gasPrice: 1,
                 safeTxGas: 0,

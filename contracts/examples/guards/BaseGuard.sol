@@ -13,7 +13,7 @@ abstract contract BaseGuard is BaseTransactionGuard, BaseModuleGuard {
      */
     function supportsInterface(bytes4 interfaceId) external view virtual override(BaseTransactionGuard, BaseModuleGuard) returns (bool) {
         return
-            interfaceId == type(ITransactionGuard).interfaceId || // 0xe6d7a83a
+            interfaceId == type(ITransactionGuard).interfaceId || // 0x5533be9d
             interfaceId == type(IModuleGuard).interfaceId || // 0x58401ed8
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }

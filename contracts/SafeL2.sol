@@ -17,6 +17,7 @@ import {Safe, Enum} from "./Safe.sol";
 contract SafeL2 is Safe {
     /**
      * @notice Safe multi-signature transaction data.
+     * @param channel The channel ID for the transaction (indexed for filtering).
      * @param to Destination address of Safe transaction.
      * @param value Native token value of Safe transaction.
      * @param data Data payload of Safe transaction.
@@ -31,6 +32,7 @@ contract SafeL2 is Safe {
      *                       This is used in order to work around "stack too deep" Solidity errors.
      */
     event SafeMultiSigTransaction(
+        uint256 indexed channel,
         address to,
         uint256 value,
         bytes data,
@@ -58,6 +60,7 @@ contract SafeL2 is Safe {
      * @inheritdoc Safe
      */
     function onBeforeExecTransaction(
+        uint256 channel,
         address to,
         uint256 value,
         bytes calldata data,
@@ -71,9 +74,10 @@ contract SafeL2 is Safe {
     ) internal override {
         bytes memory additionalInfo;
         {
-            additionalInfo = abi.encode(nonce, msg.sender, threshold);
+            additionalInfo = abi.encode(channelNonces[channel], msg.sender, threshold);
         }
         emit SafeMultiSigTransaction(
+            channel,
             to,
             value,
             data,

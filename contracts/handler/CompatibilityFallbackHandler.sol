@@ -22,9 +22,9 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
 
     /**
      * @dev The precomputed EIP-712 type hash for the Safe transaction type.
-     *      Precomputed value of: `keccak256("SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)")`.
+     *      Precomputed value of: `keccak256("SafeTx(uint256 channel,address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)")`.
      */
-    bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
+    bytes32 private constant SAFE_TX_TYPEHASH = 0x71678f49e7d9069b5052963a4bd4fe1effcf63d36fb57041d4499a96c1785d84;
 
     /**
      * @dev The sentinel module value in the {ModuleManager.modules} linked list.
@@ -182,6 +182,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @notice Returns the pre-image of the Safe transaction hash (see {Safe.getTransactionHash}).
      * @dev This method is added to the {CompatibilityFallbackHandler} for backwards compatibility with previous versions of Safe.
      *      For a given Safe, the invariant `getTransactionHash(...) == keccak256(encodeTransactionData(...))` holds true.
+     * @param channel Channel ID for the transaction.
      * @param to Destination address of the Safe transaction.
      * @param value Native token value of the Safe transaction.
      * @param data Data payload of the Safe transaction.
@@ -195,6 +196,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @return Transaction hash pre-image bytes.
      */
     function encodeTransactionData(
+        uint256 channel,
         address to,
         uint256 value,
         bytes calldata data,
@@ -212,6 +214,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         bytes32 safeTxHash = keccak256(
             abi.encode(
                 SAFE_TX_TYPEHASH,
+                channel,
                 to,
                 value,
                 keccak256(data),

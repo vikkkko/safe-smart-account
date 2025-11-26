@@ -25,6 +25,7 @@ contract OnlyOwnersGuard is BaseTransactionGuard {
      * @param msgSender Executor of the transaction.
      */
     function checkTransaction(
+        uint256,
         address,
         uint256,
         bytes memory,

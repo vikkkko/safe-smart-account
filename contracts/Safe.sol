@@ -14,6 +14,7 @@ import {SafeMath} from "./external/SafeMath.sol";
 import {ISafe} from "./interfaces/ISafe.sol";
 import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
 import {Enum} from "./libraries/Enum.sol";
+import {HAS_EXECUTED_TX_SLOT} from "./libraries/SafeStorage.sol";
 
 /**
  * @title Safe
@@ -52,8 +53,12 @@ contract Safe is
 
     /**
      * @inheritdoc ISafe
+     * @dev Version format: 1.5.0-multichannel.1
+     *      - 1.5.0: Base version following Safe's version lineage
+     *      - multichannel: Indicates multi-channel nonce support
+     *      - .1: Iteration number for this multichannel implementation
      */
-    string public constant override VERSION = "1.5.0";
+    string public constant override VERSION = "1.5.0-multichannel.1";
 
     /**
      * @dev The precomputed EIP-712 domain separator hash for Safe typed data hashing and signing.
@@ -63,14 +68,14 @@ contract Safe is
 
     /**
      * @dev The precomputed EIP-712 type hash for the Safe transaction type.
-     *      Precomputed value of: `keccak256("SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)")`.
+     *      Precomputed value of: `keccak256("SafeTx(uint256 channel,address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)")`.
      */
-    bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
+    bytes32 private constant SAFE_TX_TYPEHASH = 0x71678f49e7d9069b5052963a4bd4fe1effcf63d36fb57041d4499a96c1785d84;
 
     /**
      * @inheritdoc ISafe
      */
-    uint256 public override nonce;
+    mapping(uint256 => uint256) public channelNonces;
 
     /**
      * @dev Deprecated precomputed domain separator.
@@ -135,6 +140,7 @@ contract Safe is
      * @inheritdoc ISafe
      */
     function execTransaction(
+        uint256 channel,
         address to,
         uint256 value,
         bytes calldata data,
@@ -146,12 +152,48 @@ contract Safe is
         address payable refundReceiver,
         bytes memory signatures
     ) external payable override returns (bool success) {
-        onBeforeExecTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent "stack too deep" errors.
         {
+            uint256 currentNonce;
+            /* solhint-disable no-inline-assembly */
+            /// @solidity memory-safe-assembly
+            assembly {
+                // Load channelNonces mapping slot
+                mstore(0, channel)
+                mstore(32, channelNonces.slot)
+                let nonceSlot := keccak256(0, 64)
+                // Load current nonce
+                currentNonce := sload(nonceSlot)
+                // Increment and store
+                sstore(nonceSlot, add(currentNonce, 1))
+
+                // Mark that a transaction has been executed (only if not already set)
+                // This is used by SafeToL2Setup to prevent setup on used Safes
+                // Optimization: only write if the value is still 0 to save gas on subsequent transactions
+                if iszero(sload(HAS_EXECUTED_TX_SLOT)) {
+                    sstore(HAS_EXECUTED_TX_SLOT, 1)
+                }
+            }
+            /* solhint-enable no-inline-assembly */
+
+            onBeforeExecTransaction(
+                channel,
+                to,
+                value,
+                data,
+                operation,
+                safeTxGas,
+                baseGas,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                signatures
+            );
+
             txHash = getTransactionHash(
-                // Transaction info:
+                // Channel and transaction info:
+                channel,
                 to,
                 value,
                 data,
@@ -162,8 +204,8 @@ contract Safe is
                 gasPrice,
                 gasToken,
                 refundReceiver,
-                // We use the post-increment here, so the current `nonce` value is used and incremented afterwards.
-                nonce++
+                // Nonce value is used and incremented.
+                currentNonce
             );
             checkSignatures(msg.sender, txHash, signatures);
         }
@@ -171,7 +213,8 @@ contract Safe is
         {
             if (guard != address(0)) {
                 ITransactionGuard(guard).checkTransaction(
-                    // Transaction info:
+                    // Channel and transaction info:
+                    channel,
                     to,
                     value,
                     data,
@@ -432,6 +475,7 @@ contract Safe is
      * @inheritdoc ISafe
      */
     function getTransactionHash(
+        uint256 channel,
         address to,
         uint256 value,
         bytes calldata data,
@@ -467,31 +511,33 @@ contract Safe is
             // Step 2: Prepare the SafeTX struct for hashing.
             // Layout in memory:
             // ptr +   0: `SAFE_TX_TYPEHASH` (constant defining the Safe transaction struct hash)
-            // ptr +  32: `to`
-            // ptr +  64: `value`
-            // ptr +  96: `calldataHash = keccak256(data)`
-            // ptr + 128: `operation`
-            // ptr + 160: `safeTxGas`
-            // ptr + 192: `baseGas`
-            // ptr + 224: `gasPrice`
-            // ptr + 256: `gasToken`
-            // ptr + 288: `refundReceiver`
-            // ptr + 320: `nonce`
+            // ptr +  32: `channel`
+            // ptr +  64: `to`
+            // ptr +  96: `value`
+            // ptr + 128: `calldataHash = keccak256(data)`
+            // ptr + 160: `operation`
+            // ptr + 192: `safeTxGas`
+            // ptr + 224: `baseGas`
+            // ptr + 256: `gasPrice`
+            // ptr + 288: `gasToken`
+            // ptr + 320: `refundReceiver`
+            // ptr + 352: `nonce`
             mstore(ptr, SAFE_TX_TYPEHASH)
-            mstore(add(ptr, 32), to)
-            mstore(add(ptr, 64), value)
-            mstore(add(ptr, 96), calldataHash)
-            mstore(add(ptr, 128), operation)
-            mstore(add(ptr, 160), safeTxGas)
-            mstore(add(ptr, 192), baseGas)
-            mstore(add(ptr, 224), gasPrice)
-            mstore(add(ptr, 256), gasToken)
-            mstore(add(ptr, 288), refundReceiver)
-            mstore(add(ptr, 320), _nonce)
+            mstore(add(ptr, 32), channel)
+            mstore(add(ptr, 64), to)
+            mstore(add(ptr, 96), value)
+            mstore(add(ptr, 128), calldataHash)
+            mstore(add(ptr, 160), operation)
+            mstore(add(ptr, 192), safeTxGas)
+            mstore(add(ptr, 224), baseGas)
+            mstore(add(ptr, 256), gasPrice)
+            mstore(add(ptr, 288), gasToken)
+            mstore(add(ptr, 320), refundReceiver)
+            mstore(add(ptr, 352), _nonce)
 
             // Step 3: Calculate the final EIP-712 hash.
-            // First, hash the SafeTX struct (352 bytes total length).
-            mstore(add(ptr, 64), keccak256(ptr, 352))
+            // First, hash the SafeTX struct (384 bytes total length).
+            mstore(add(ptr, 64), keccak256(ptr, 384))
             // Store the EIP-712 prefix (`0x1901`), note that integers are left-padded with 0's,
             // so the EIP-712 encoded data starts at `add(ptr, 30)`.
             mstore(ptr, 0x1901)
@@ -505,6 +551,7 @@ contract Safe is
 
     /**
      * @notice A hook that gets called before execution of the {execTransaction} method.
+     * @param channel The channel ID for the transaction.
      * @param to Destination address of Safe transaction.
      * @param value Native token value of Safe transaction.
      * @param data Data payload of Safe transaction.
@@ -517,6 +564,7 @@ contract Safe is
      * @param signatures Signature data for the executed transaction.
      */
     function onBeforeExecTransaction(
+        uint256 channel,
         address to,
         uint256 value,
         bytes calldata data,

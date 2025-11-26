@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {SafeStorage} from "../libraries/SafeStorage.sol";
+import {SafeStorage, HAS_EXECUTED_TX_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
  * @title Safe to L2 Setup Contract
@@ -41,9 +41,18 @@ contract SafeToL2Setup is SafeStorage {
 
     /**
      * @notice Modifier to prevent using initialized Safes.
+     * @dev Checks the global transaction execution flag to ensure no transactions
+     *      have been executed on ANY channel, regardless of the channel number.
      */
     modifier onlyNonceZero() {
-        require(nonce == 0, "Safe must have not executed any tx");
+        bool hasExecuted;
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
+        assembly {
+            hasExecuted := sload(HAS_EXECUTED_TX_SLOT)
+        }
+        /* solhint-enable no-inline-assembly */
+        require(!hasExecuted, "Safe must have not executed any tx");
         _;
     }
 

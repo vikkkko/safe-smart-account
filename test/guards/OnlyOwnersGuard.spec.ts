@@ -36,7 +36,7 @@ describe("OnlyOwnersGuard", () => {
                 signers: [user1],
             } = await setupTests();
             const mockAddress = await mock.getAddress();
-            const nonce = await safe.nonce();
+            const nonce = await safe.channelNonces(0);
             const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce });
 
             await executeTxWithSigners(safe.connect(user1), safeTx, [user1]);
@@ -48,7 +48,7 @@ describe("OnlyOwnersGuard", () => {
                 mock,
                 signers: [user1, user2],
             } = await setupTests();
-            const nonce = await safe.nonce();
+            const nonce = await safe.channelNonces(0);
             const mockAddress = await mock.getAddress();
             const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce });
             const signature = await safeSignTypedData(user1, await safe.getAddress(), safeTx);

@@ -70,7 +70,7 @@ describe("MultiSend", () => {
             } = await setupTests();
 
             const txs = [buildSafeTransaction({ to: user2.address, operation: 2, nonce: 0 })];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
             await expect(
                 executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)]),
             ).to.revertedWithoutReason();
@@ -84,7 +84,7 @@ describe("MultiSend", () => {
             } = await setupTests();
 
             const txs: MetaTransaction[] = [];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
             await expect(executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)])).to.emit(
                 safe,
                 "ExecutionSuccess",
@@ -102,7 +102,7 @@ describe("MultiSend", () => {
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
 
             const txs: MetaTransaction[] = [buildSafeTransaction({ to: user2.address, value: ethers.parseEther("1"), nonce: 0 })];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
             await expect(executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)])).to.emit(
                 safe,
                 "ExecutionSuccess",
@@ -126,7 +126,7 @@ describe("MultiSend", () => {
                 buildSafeTransaction({ to: user2.address, value: ethers.parseEther("1"), nonce: 0 }),
                 buildSafeTransaction({ to: user2.address, value: ethers.parseEther("1"), nonce: 0 }),
             ];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce(), { safeTxGas: 1 });
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0), { safeTxGas: 1 });
             await expect(executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)])).to.emit(
                 safe,
                 "ExecutionFailure",
@@ -145,7 +145,7 @@ describe("MultiSend", () => {
             } = await setupTests();
 
             const txs: MetaTransaction[] = [await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0)];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
 
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("0"));
 
@@ -168,7 +168,7 @@ describe("MultiSend", () => {
             const storageSetterAddress = await storageSetter.getAddress();
 
             const txs: MetaTransaction[] = [await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0)];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
             await expect(executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)])).to.emit(
                 safe,
                 "ExecutionSuccess",
@@ -198,7 +198,7 @@ describe("MultiSend", () => {
             const storageSetterAddress = await storageSetter.getAddress();
 
             const txs: MetaTransaction[] = [await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0, true)];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
             await expect(executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)])).to.emit(
                 safe,
                 "ExecutionSuccess",
@@ -236,7 +236,7 @@ describe("MultiSend", () => {
                 await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0, true),
                 await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0),
             ];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
             await expect(executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)])).to.emit(
                 safe,
                 "ExecutionSuccess",
@@ -339,7 +339,7 @@ describe("MultiSend", () => {
                     operation: 0,
                 },
             ];
-            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.channelNonces(0));
 
             await executeTxWithSigners(safe, safeTx, [user1]);
 

@@ -91,6 +91,7 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
      *      - if the contract at `to` address has code or not
      *      - if the `gasToken` is a contract or not
      *      It is the responsibility of the caller to perform such checks.
+     * @param channel The channel ID for the transaction.
      * @param to Destination address of Safe transaction.
      * @param value Native token value of the Safe transaction.
      * @param data Data payload of the Safe transaction.
@@ -105,6 +106,7 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
      * @return success Boolean indicating transaction's success.
      */
     function execTransaction(
+        uint256 channel,
         address to,
         uint256 value,
         bytes calldata data,
@@ -157,6 +159,7 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
 
     /**
      * @notice Returns transaction hash to be signed by owners.
+     * @param channel The channel ID for the transaction.
      * @param to Destination address of Safe transaction.
      * @param value Native token value of the Safe transaction.
      * @param data Data payload of the Safe transaction.
@@ -170,6 +173,7 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
      * @return Safe transaction hash.
      */
     function getTransactionHash(
+        uint256 channel,
         address to,
         uint256 value,
         bytes calldata data,
@@ -190,10 +194,11 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
     function VERSION() external view returns (string memory);
 
     /**
-     * @notice Returns the nonce of the Safe contract.
-     * @return The current nonce.
+     * @notice Returns the nonce for a specific channel of the Safe contract.
+     * @param channel The channel ID to query.
+     * @return The current nonce for the specified channel.
      */
-    function nonce() external view returns (uint256);
+    function channelNonces(uint256 channel) external view returns (uint256);
 
     /**
      * @notice Returns a non-zero value if the `messageHash` is signed for the Safe.

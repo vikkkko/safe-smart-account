@@ -30,7 +30,7 @@ describe("Upgrade from Safe 1.4.1 L2", () => {
         expect(await safe.VERSION()).to.be.eq("1.4.1");
         const safeMigrationDeployment = await deployments.get("SafeMigration");
         const safeMigration = await hre.ethers.getContractAt("SafeMigration", safeMigrationDeployment.address);
-        const nonce = await safe.nonce();
+        const nonce = await safe.channelNonces(0);
         const data = safeMigration.interface.encodeFunctionData("migrateSingleton");
         const tx = buildSafeTransaction({ to: await safeMigration.getAddress(), data, nonce, operation: 1 });
         await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]);

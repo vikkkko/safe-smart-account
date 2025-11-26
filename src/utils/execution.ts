@@ -11,8 +11,9 @@ export const EIP_DOMAIN = {
 };
 
 export const EIP712_SAFE_TX_TYPE = {
-    // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+    // "SafeTx(uint256 channel,address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
     SafeTx: [
+        { type: "uint256", name: "channel" },
         { type: "address", name: "to" },
         { type: "uint256", name: "value" },
         { type: "bytes", name: "data" },
@@ -39,6 +40,7 @@ export interface MetaTransaction {
 }
 
 export interface SafeTransaction extends MetaTransaction {
+    channel: BigNumberish;
     safeTxGas: BigNumberish;
     baseGas: BigNumberish;
     gasPrice: BigNumberish;
@@ -199,6 +201,7 @@ export const executeTx = async (
 ): Promise<ethers.ContractTransactionResponse> => {
     const signatureBytes = buildSignatureBytes(signatures);
     return safe.execTransaction(
+        safeTx.channel,
         safeTx.to,
         safeTx.value,
         safeTx.data,
@@ -230,6 +233,7 @@ export const buildContractCall = async (
                 to: contractAddress,
                 data,
                 operation: delegateCall ? 1 : 0,
+                channel: 0, // Default to channel 0
                 nonce,
             },
             overrides,
@@ -252,7 +256,7 @@ export const executeContractCallWithSigners = async (
     delegateCall?: boolean,
     overrides?: Partial<SafeTransaction>,
 ) => {
-    const tx = await buildContractCall(contract, method, params, await safe.nonce(), delegateCall, overrides);
+    const tx = await buildContractCall(contract, method, params, await safe.channelNonces(0), delegateCall, overrides);
     return executeTxWithSigners(safe, tx, signers);
 };
 
@@ -267,6 +271,7 @@ export const buildSafeTransaction = (template: {
     gasToken?: string;
     refundReceiver?: string;
     nonce: BigNumberish;
+    channel?: BigNumberish;
 }): SafeTransaction => {
     // Use nullish coalescing so intentional falsy values (e.g., 0) are preserved
     return {
@@ -280,5 +285,6 @@ export const buildSafeTransaction = (template: {
         gasToken: template.gasToken ?? AddressZero,
         refundReceiver: template.refundReceiver ?? AddressZero,
         nonce: template.nonce,
+        channel: template.channel ?? 0,
     };
 };

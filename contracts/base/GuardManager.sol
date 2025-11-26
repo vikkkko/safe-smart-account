@@ -16,6 +16,7 @@ interface ITransactionGuard is IERC165 {
     /**
      * @notice Checks the transaction details.
      * @dev The function needs to implement transaction validation logic.
+     * @param channel The channel ID for the transaction.
      * @param to The address to which the transaction is intended.
      * @param value The native token value of the transaction in Wei.
      * @param data The transaction data.
@@ -29,6 +30,7 @@ interface ITransactionGuard is IERC165 {
      * @param msgSender The address of the message sender.
      */
     function checkTransaction(
+        uint256 channel,
         address to,
         uint256 value,
         bytes memory data,
@@ -60,7 +62,7 @@ abstract contract BaseTransactionGuard is ITransactionGuard {
      */
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
-            interfaceId == type(ITransactionGuard).interfaceId || // 0xe6d7a83a
+            interfaceId == type(ITransactionGuard).interfaceId || // 0x5533be9d
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }

@@ -36,7 +36,7 @@ abstract contract SafeStorage {
     /**
      * @dev See <../Safe.sol>.
      */
-    uint256 internal nonce;
+    mapping(uint256 => uint256) internal channelNonces;
 
     /**
      * @dev See <../Safe.sol>.
@@ -71,3 +71,10 @@ bytes32 constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba50043
  *      Precomputed value of: `keccak256("module_manager.module_guard.address")`.
  */
 bytes32 constant MODULE_GUARD_STORAGE_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
+
+/**
+ * @dev The storage slot used for tracking whether any transaction has been executed.
+ *      Precomputed value of: `keccak256("safe.has_executed_transaction")`.
+ *      This is used to prevent setup functions from being called on used Safes.
+ */
+bytes32 constant HAS_EXECUTED_TX_SLOT = 0xfffcdcc89273d3a52bbad6cdcb4f6ca39e7ae4f0ba48dd50485d6a1d3bd19728;

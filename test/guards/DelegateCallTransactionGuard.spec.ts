@@ -61,6 +61,7 @@ describe("DelegateCallTransactionGuard", () => {
             const tx = await buildContractCall(safe, "setGuard", [AddressZero], 0, true);
             await expect(
                 guard.checkTransaction(
+                    tx.channel,
                     tx.to,
                     tx.value,
                     tx.data,
@@ -84,6 +85,7 @@ describe("DelegateCallTransactionGuard", () => {
             } = await setupTests();
             const tx = await buildContractCall(safe, "setGuard", [AddressZero], 0);
             await guard.checkTransaction(
+                tx.channel,
                 tx.to,
                 tx.value,
                 tx.data,

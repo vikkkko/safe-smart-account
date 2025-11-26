@@ -38,7 +38,7 @@ if (["mainnet", "sepolia"].includes(argv.network) && INFURA_KEY === undefined) {
 }
 
 const DEFAULT_MNEMONIC = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
-const DEFAULT_SOLIDITY_VERSION = "0.7.6";
+const DEFAULT_SOLIDITY_VERSION = "0.8.19";
 
 const sharedNetworkConfig: HttpNetworkUserConfig = {};
 if (PK) {
@@ -78,8 +78,26 @@ const userConfig: HardhatUserConfig = {
     },
     solidity: {
         compilers: [
-            { version: SOLIDITY_VERSION ?? DEFAULT_SOLIDITY_VERSION, settings: soliditySettings },
-            { version: DEFAULT_SOLIDITY_VERSION },
+            {
+                version: SOLIDITY_VERSION ?? DEFAULT_SOLIDITY_VERSION,
+                settings: soliditySettings ?? {
+                    viaIR: true,
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000000,
+                    },
+                }
+            },
+            {
+                version: DEFAULT_SOLIDITY_VERSION,
+                settings: {
+                    viaIR: true,
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000000,
+                    },
+                }
+            },
         ],
     },
     networks: {

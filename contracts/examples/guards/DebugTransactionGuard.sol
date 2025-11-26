@@ -52,6 +52,7 @@ contract DebugTransactionGuard is BaseGuard {
      * @param executor Account executing the transaction.
      */
     function checkTransaction(
+        uint256 channel,
         address to,
         uint256 value,
         bytes memory data,
@@ -69,8 +70,21 @@ contract DebugTransactionGuard is BaseGuard {
         bytes32 txHash;
         {
             ISafe safe = ISafe(payable(msg.sender));
-            nonce = safe.nonce() - 1;
-            txHash = safe.getTransactionHash(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce);
+            // The nonce has already been incremented in Safe.execTransaction, so we need to subtract 1
+            nonce = safe.channelNonces(channel) - 1;
+            txHash = safe.getTransactionHash(
+                channel,
+                to,
+                value,
+                data,
+                operation,
+                safeTxGas,
+                baseGas,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                nonce
+            );
         }
         emit TransactionDetails(msg.sender, txHash, to, value, data, operation, safeTxGas, gasPrice > 0, nonce, signatures, executor);
         txNonces[txHash] = nonce;
