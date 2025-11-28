@@ -1,0 +1,36 @@
+{
+    "network": "sepolia",
+    "chainId": 11155111,
+    "version": "1.5.0+multichannel.1",
+    "deployedAt": "2025-11-26",
+    "contracts": {
+        "Safe": "0xf1da1C6Dbdb74F16f9b2054795e29df01b5eb3a2",
+        "SafeL2": "0xdDd4D7f67bA22b58a9340330A5a220A122967fec",
+        "SafeProxyFactory": "0x72D89c510AFBeC255b81482C8DCC720FC8743175",
+        "CompatibilityFallbackHandler": "0x51Eb07162CDd89e0575d059e848888e283155710",
+        "TokenCallbackHandler": "0xf69666A6aD569d789f411478F5F834bA9ABf83Fa",
+        "ExtensibleFallbackHandler": "0x7571cC5879926429c125816686e8fdF1A8514c96",
+        "SimulateTxAccessor": "0x9F4D1AE5AcD738be43810C57Ae30B85523163F97",
+        "CreateCall": "0xe324d7DFe4B1cf38Deac8397cFE98fBBFE46D349",
+        "MultiSend": "0xAf4bc1f38ab171b69edD46fD11B4b66580488c74",
+        "MultiSendCallOnly": "0x4A8E76A4eCaD4Fb0B3e8f51ec43A6979D384B0bF",
+        "SignMessageLib": "0x662a9BAB37AF013D5A9a3e3B3b50E5133Ebfb6d5",
+        "SafeToL2Setup": "0x0F472A1Ad2c780A13E6A5a7f200Ffd2069d22eDD",
+        "SafeMigration": "0x874Aa09AB1873c515328D8a1A1bb170d8C275983"
+    },
+    "explorerUrls": {
+        "Safe": "https://sepolia.etherscan.io/address/0xf1da1C6Dbdb74F16f9b2054795e29df01b5eb3a2#code",
+        "SafeL2": "https://sepolia.etherscan.io/address/0xdDd4D7f67bA22b58a9340330A5a220A122967fec#code",
+        "SafeProxyFactory": "https://sepolia.etherscan.io/address/0x72D89c510AFBeC255b81482C8DCC720FC8743175#code",
+        "CompatibilityFallbackHandler": "https://sepolia.etherscan.io/address/0x51Eb07162CDd89e0575d059e848888e283155710#code",
+        "TokenCallbackHandler": "https://sepolia.etherscan.io/address/0xf69666A6aD569d789f411478F5F834bA9ABf83Fa#code",
+        "ExtensibleFallbackHandler": "https://sepolia.etherscan.io/address/0x7571cC5879926429c125816686e8fdF1A8514c96#code",
+        "SimulateTxAccessor": "https://sepolia.etherscan.io/address/0x9F4D1AE5AcD738be43810C57Ae30B85523163F97#code",
+        "CreateCall": "https://sepolia.etherscan.io/address/0xe324d7DFe4B1cf38Deac8397cFE98fBBFE46D349#code",
+        "MultiSend": "https://sepolia.etherscan.io/address/0xAf4bc1f38ab171b69edD46fD11B4b66580488c74#code",
+        "MultiSendCallOnly": "https://sepolia.etherscan.io/address/0x4A8E76A4eCaD4Fb0B3e8f51ec43A6979D384B0bF#code",
+        "SignMessageLib": "https://sepolia.etherscan.io/address/0x662a9BAB37AF013D5A9a3e3B3b50E5133Ebfb6d5#code",
+        "SafeToL2Setup": "https://sepolia.etherscan.io/address/0x0F472A1Ad2c780A13E6A5a7f200Ffd2069d22eDD#code",
+        "SafeMigration": "https://sepolia.etherscan.io/address/0x874Aa09AB1873c515328D8a1A1bb170d8C275983#code"
+    }
+}

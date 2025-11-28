@@ -58,7 +58,7 @@ contract Safe is
      *      - multichannel: Indicates multi-channel nonce support
      *      - .1: Iteration number for this multichannel implementation
      */
-    string public constant override VERSION = "1.5.0-multichannel.1";
+    string public constant override VERSION = "1.5.0+multichannel.1";
 
     /**
      * @dev The precomputed EIP-712 domain separator hash for Safe typed data hashing and signing.
