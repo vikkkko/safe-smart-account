@@ -70,11 +70,13 @@ contract SafeL2 is Safe {
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes memory signatures
+        bytes memory signatures,
+        uint256 nonce
     ) internal override {
         bytes memory additionalInfo;
         {
-            additionalInfo = abi.encode(channelNonces[channel], msg.sender, threshold);
+            // The pre-increment nonce is used for signing; pass it through to avoid reading the incremented storage value.
+            additionalInfo = abi.encode(nonce, msg.sender, threshold);
         }
         emit SafeMultiSigTransaction(
             channel,

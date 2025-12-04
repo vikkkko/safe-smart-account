@@ -188,7 +188,8 @@ contract Safe is
                 gasPrice,
                 gasToken,
                 refundReceiver,
-                signatures
+                signatures,
+                currentNonce
             );
 
             txHash = getTransactionHash(
@@ -562,6 +563,7 @@ contract Safe is
      * @param gasToken Token address (or 0 for the native token) that is used for the payment.
      * @param refundReceiver Address of receiver of gas payment (or 0 for `tx.origin`).
      * @param signatures Signature data for the executed transaction.
+     * @param nonce Nonce that is being used for this transaction hash.
      */
     function onBeforeExecTransaction(
         uint256 channel,
@@ -574,6 +576,7 @@ contract Safe is
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes memory signatures
+        bytes memory signatures,
+        uint256 nonce
     ) internal virtual {}
 }
